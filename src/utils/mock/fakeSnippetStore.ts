@@ -8,7 +8,7 @@ import {Rule} from "../../types/Rule.ts";
 
 const INITIAL_SNIPPETS: Snippet[] = [
   {
-    id: '9af91631-cdfc-4341-9b8e-3694e5cb3672',
+    assetId: '9af91631-cdfc-4341-9b8e-3694e5cb3672',
     name: 'Super Snippet',
     content: 'let a : number = 5;\nlet b : number = 5;\n\nprintln(a + b);',
     compliance: 'pending',
@@ -17,16 +17,16 @@ const INITIAL_SNIPPETS: Snippet[] = [
     extension: 'prs'
   },
   {
-    id: 'c48cf644-fbc1-4649-a8f4-9dd7110640d9',
+    assetId: 'c48cf644-fbc1-4649-a8f4-9dd7110640d9',
     name: 'Extra cool Snippet',
     content: 'let a : number = 5;\nlet b : number = 5;\n\nprintln(a + b);',
-    compliance: 'not-compliant',
+    compliance: 'failed',
     author: 'John Doe',
     language: 'printscript',
     extension: 'prs'
   },
   {
-    id: '34bf4b7a-d4a1-48be-bb26-7d9a3be46227',
+    assetId: '34bf4b7a-d4a1-48be-bb26-7d9a3be46227',
     name: 'Boaring Snippet',
     content: 'let a : number = 5;\nlet b : number = 5;\n\nprintln(a + b);',
     compliance: 'compliant',
@@ -165,7 +165,7 @@ export class FakeSnippetStore {
 
   constructor() {
     INITIAL_SNIPPETS.forEach(snippet => {
-      this.snippetMap.set(snippet.id, snippet)
+      this.snippetMap.set(snippet.assetId, snippet)
     })
 
     fakeTestCases.forEach(testCase => {
@@ -182,7 +182,7 @@ export class FakeSnippetStore {
   createSnippet(createSnippet: CreateSnippet): Snippet {
     const id = uuid();
     const newSnippet = {
-      id,
+      assetId: id,
       compliance: 'compliant' as ComplianceEnum,
       author: 'yo',
       ...createSnippet
