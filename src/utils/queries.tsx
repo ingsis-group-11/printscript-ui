@@ -13,6 +13,7 @@ import { RealSnippetOperations } from './integration/realSnippetOperations.ts';
 
 export const useSnippetsOperations = () => {
   const {getAccessTokenSilently} = useAuth0()
+  
 
   const snippetOperations: SnippetOperations = new RealSnippetOperations(getAccessTokenSilently);
   //const snippetOperations: SnippetOperations = new FakeSnippetOperations(/* getAccessTokenSilently */);

@@ -6,10 +6,13 @@ import {TestCase} from "../../types/TestCase";
 import {TestCaseResult} from "../queries";
 import {FileType} from "../../types/FileType";
 import {Rule} from "../../types/Rule";
+import {FakeSnippetStore} from '../mock/fakeSnippetStore'
 
-const API_BASE_URL = "http://localhost:80";
+const SNIPPET_MANAGER_URL = 'http://localhost:8000';
+const API_BASE_URL = 'http://localhost:8080';
 
 export class RealSnippetOperations implements SnippetOperations {
+  private readonly fakeStore = new FakeSnippetStore()
   private getAccessTokenSilently: () => Promise<string>;
 
   constructor(getAccessTokenSilently: () => Promise<string>) {
@@ -27,7 +30,7 @@ export class RealSnippetOperations implements SnippetOperations {
     formData.append("name", createSnippet.name);
     formData.append("language", createSnippet.language);
 
-    const response = await fetch(`${API_BASE_URL}/api/snippets`, {
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/api/snippet`, {
       method: 'PUT',
       body: formData,
       headers: {
@@ -49,8 +52,16 @@ export class RealSnippetOperations implements SnippetOperations {
   }
 
   async listSnippetDescriptors(page: number, pageSize: number): Promise<PaginatedSnippets> {
-    const response = await fetch(`${API_BASE_URL}/snippets?page=${page}&pageSize=${pageSize}`);
-    return await response.json();
+    const response: PaginatedSnippets = {
+      page: page,
+      page_size: pageSize,
+      count: 20,
+      snippets: page == 0 ? this.fakeStore.listSnippetDescriptors().splice(0,pageSize) : this.fakeStore.listSnippetDescriptors().splice(1,2)
+    }
+
+    return new Promise(resolve => {
+      resolve(response)
+    })
   }
 
   async updateSnippetById(id: string, updateSnippet: UpdateSnippet): Promise<Snippet> {
@@ -121,8 +132,9 @@ export class RealSnippetOperations implements SnippetOperations {
   }
 
   async getFileTypes(): Promise<FileType[]> {
-    const response = await fetch(`${API_BASE_URL}/fileTypes`);
-    return await response.json();
+    return new Promise(resolve => {
+      resolve(this.fakeStore.getFileTypes())
+    })
   }
 
   async modifyFormatRule(newRules: Rule[]): Promise<Rule[]> {
