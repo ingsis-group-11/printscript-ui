@@ -9,6 +9,8 @@ import {Rule} from "../../types/Rule";
 import {FakeSnippetStore} from '../mock/fakeSnippetStore'
 
 const SNIPPET_MANAGER_URL = 'http://localhost:8000/api/snippet';
+const FORMATTER_SERVICE_URL = 'http://localhost:8000/api/formatter-rule';
+const LINTTER_SERVICE_URL = 'http://localhost:8000/api/linting-rule';
 const API_BASE_URL = 'http://localhost:8080';
 const PERMISSION_SERVICE_URL = 'http://localhost:8003/api/permission';
 
@@ -61,18 +63,26 @@ export class RealSnippetOperations implements SnippetOperations {
     return await response.json() as Snippet;
   }
 
-  // TODO
   async listSnippetDescriptors(page: number, pageSize: number): Promise<PaginatedSnippets> { 
+    const accessToken = await this.getAccessTokenSilently();
+    const to = page * pageSize -1;
+    const from = page * pageSize - pageSize;
+    
+    const snippets = await fetch(`${SNIPPET_MANAGER_URL}?from=${from}?to=${to}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+
     const response: PaginatedSnippets = {
       page: page,
       page_size: pageSize,
-      count: 20,
-      snippets: page == 0 ? this.fakeStore.listSnippetDescriptors().splice(0,pageSize) : this.fakeStore.listSnippetDescriptors().splice(1,2)
+      count: await snippets.json().then(data => data.length),
+      snippets: await snippets.json().then(data => data)
     }
 
-    return new Promise(resolve => {
-      resolve(response)
-    })
+    return response;
   }
 
   async updateSnippetById(id: string, updateSnippet: UpdateSnippet): Promise<Snippet> {
@@ -124,16 +134,36 @@ export class RealSnippetOperations implements SnippetOperations {
     return await response.json();
   }
 
-  // TODO
   async getFormatRules(): Promise<Rule[]> {
-    const response = await fetch(`${API_BASE_URL}/rules/format`);
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/api/formatter-rule`);
+    
+    if (!response.ok) {
+        throw new Error("Failed to fetch format rules");
+    }
+
+    const rulesDto: Rule[] = await response.json();
+    return rulesDto.map(ruleDto => ({
+        id: "", 
+        name: ruleDto.name,
+        isActive: typeof ruleDto.value === "boolean" ? ruleDto.value : false,
+        value: typeof ruleDto.value !== "boolean" ? ruleDto.value : null
+    }));
   }
 
-  // TODO
   async getLintingRules(): Promise<Rule[]> {
-    const response = await fetch(`${API_BASE_URL}/rules/lint`);
-    return await response.json();
+    const response = await fetch(`${API_BASE_URL}/api/linting-rule`);
+    
+    if (!response.ok) {
+        throw new Error("Failed to fetch linting rules");
+    }
+
+    const rulesDto: Rule[] = await response.json();
+    return rulesDto.map(ruleDto => ({
+        id: ruleDto.id,  
+        name: ruleDto.name,
+        isActive: typeof ruleDto.value === 'boolean' ? ruleDto.value : true,
+        value: typeof ruleDto.value !== 'boolean' ? ruleDto.value : null
+    }));
   }
 
   // TODO
@@ -194,23 +224,43 @@ export class RealSnippetOperations implements SnippetOperations {
     })
   }
 
-  // TODO
   async modifyFormatRule(newRules: Rule[]): Promise<Rule[]> {
-    const response = await fetch(`${API_BASE_URL}/rules/format`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newRules)
-    });
-    return await response.json();
-  }
+    const ruleDtos = newRules.map(rule => ({
+      name: rule.name,
+      value: rule.value !== null && rule.value !== undefined ? rule.value : rule.isActive
+    }));
 
-  // TODO
-  async modifyLintingRule(newRules: Rule[]): Promise<Rule[]> {
-    const response = await fetch(`${API_BASE_URL}/rules/lint`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newRules)
+    const response = await fetch(`${FORMATTER_SERVICE_URL}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ruleDtos)
     });
-    return await response.json();
-  }
+
+    if (!response.ok) {
+        throw new Error("Failed to update format rules");
+    }
+
+    const updatedRules: Rule[] = await response.json();
+    return updatedRules;
+}
+
+async modifyLintingRule(newRules: Rule[]): Promise<Rule[]> {
+    const ruleDtos = newRules.map(rule => ({
+      name: rule.name,
+      value: rule.value !== null && rule.value !== undefined ? rule.value : rule.isActive
+    }));
+
+    const response = await fetch(`${LINTTER_SERVICE_URL}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ruleDtos)
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to update linting rules");
+    }
+
+    const updatedRules: Rule[] = await response.json();
+    return updatedRules;
+}
 }
