@@ -4,7 +4,6 @@ import {FileType} from "../types/FileType.ts";
 export type ComplianceEnum =
     'pending' |
     'failed' |
-    'not-compliant' |
     'compliant'
 
 
@@ -22,7 +21,7 @@ export type UpdateSnippet = {
 }
 
 export type Snippet = CreateSnippet & {
-  id: string
+  assetId: string
 } & SnippetStatus
 
 type SnippetStatus = {
