@@ -1,0 +1,63 @@
+name: Build and Push Docker Image for React Frontend
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Paso 1: Checkout del código
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Paso 2: Configurar Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'  # O la versión de Node.js que estés usando
+          cache: 'npm'
+
+      # Paso 3: Instalar dependencias de React con npm
+      - name: Install dependencies
+        run: |
+          npm install
+
+      # Paso 4: Construir la aplicación de React con Vite
+      - name: Build React App
+        run: |
+          npm run build
+
+      # Paso 5: Iniciar sesión en GitHub Container Registry
+      - name: Login GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      # Paso 6: Establecer el tag de la imagen según la rama
+      - name: Set Docker Image Tag
+        id: get-tag
+        run: |
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            echo "TAG=latest" >> $GITHUB_ENV
+          elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
+            echo "TAG=dev" >> $GITHUB_ENV
+          else
+            echo "TAG=other" >> $GITHUB_ENV
+          fi
+
+      - name: Build And Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: . 
+          push: true
+          tags: ghcr.io/${{ github.repository }}:${{ env.TAG }}
+          secrets: |
+            gpr_user=${{github.actor}}
+            gpr_token=${{secrets.DOCKER_TOKEN}}
