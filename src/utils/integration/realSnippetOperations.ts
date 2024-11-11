@@ -8,12 +8,10 @@ import {FileType} from "../../types/FileType";
 import {Rule} from "../../types/Rule";
 import {FakeSnippetStore} from '../mock/fakeSnippetStore'
 
-const SNIPPET_MANAGER_URL = 'http://localhost:8000/api/snippet';
-const PS_SERVICE_URL = 'http://localhost:8004';
-const FORMATTER_SERVICE_URL = 'http://localhost:8000/api/formatter-rule';
-const LINTTER_SERVICE_URL = 'http://localhost:8000/api/linting-rule';
+const SNIPPET_MANAGER_URL = import.meta.env.VITE_SNIPPET_MANAGER_URL || 'http://localhost:8000/api';
+const PS_SERVICE_URL = import.meta.env.VITE_PRINTSCRIPT_SERVICE_URL || 'http://localhost:8004/api';
 const API_BASE_URL = 'http://localhost:8080';
-const PERMISSION_SERVICE_URL = 'http://localhost:8003/api/permission';
+const PERMISSION_SERVICE_URL = import.meta.env.VITE_PERMISSION_MANAGER_URL || 'http://localhost:8003/api/permission';
 
 export class RealSnippetOperations implements SnippetOperations {
   private readonly fakeStore = new FakeSnippetStore()
@@ -35,7 +33,7 @@ export class RealSnippetOperations implements SnippetOperations {
     formData.append("language", createSnippet.language);
     formData.append("extension", createSnippet.extension)
 
-    const response = await fetch(`${SNIPPET_MANAGER_URL}`, {
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/snippet`, {
       method: 'PUT',
       body: formData,
       headers: {
@@ -54,7 +52,7 @@ export class RealSnippetOperations implements SnippetOperations {
   async getSnippetById(id: string): Promise<Snippet | undefined> {
     const accessToken = await this.getAccessTokenSilently();
 
-    const response = await fetch(`${SNIPPET_MANAGER_URL}/${id}`, {
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/snippet/${id}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`
@@ -69,7 +67,7 @@ export class RealSnippetOperations implements SnippetOperations {
     const from = (page + 1) * pageSize - pageSize;
     const to = (page + 1) * pageSize;
 
-    const response = await fetch(`${SNIPPET_MANAGER_URL}?from=${from}&to=${to}`, {
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/snippet?from=${from}&to=${to}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${accessToken}`
@@ -143,7 +141,7 @@ export class RealSnippetOperations implements SnippetOperations {
   async getFormatRules(): Promise<Rule[]> {
     const accessToken = await this.getAccessTokenSilently();
 
-    const response = await fetch(`${FORMATTER_SERVICE_URL}`, {
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/formatter-rule`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -167,7 +165,7 @@ export class RealSnippetOperations implements SnippetOperations {
   async getLintingRules(): Promise<Rule[]> {
     const accessToken = await this.getAccessTokenSilently();
 
-    const response = await fetch(`${LINTTER_SERVICE_URL}`, {
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/linting-rule`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -190,7 +188,7 @@ export class RealSnippetOperations implements SnippetOperations {
 
   async formatSnippet(snippetContent: string): Promise<string> {
     const accessToken = await this.getAccessTokenSilently();
-    const response = await fetch(`${PS_SERVICE_URL}/api/format`, {
+    const response = await fetch(`${PS_SERVICE_URL}/format`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -233,7 +231,7 @@ export class RealSnippetOperations implements SnippetOperations {
   async deleteSnippet(id: string): Promise<string> {
     const accessToken = await this.getAccessTokenSilently();
 
-    const response = await fetch(`${SNIPPET_MANAGER_URL}/${id}`, {
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/snippet/${id}`, {
       method: 'DELETE',
       headers: {
         Authorization: `Bearer ${accessToken}`
@@ -251,7 +249,7 @@ export class RealSnippetOperations implements SnippetOperations {
   async getFileTypes(): Promise<FileType[]> {
     const accessToken = await this.getAccessTokenSilently();
 
-    const response = await fetch(`${SNIPPET_MANAGER_URL}/languages`, {
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/snippet/languages`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -269,7 +267,7 @@ export class RealSnippetOperations implements SnippetOperations {
   async modifyFormatRule(newRules: Rule[]): Promise<Rule[]> {
     const accessToken = await this.getAccessTokenSilently();
 
-    const response = await fetch(`${FORMATTER_SERVICE_URL}`, {
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/formatter-rule`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -289,7 +287,7 @@ export class RealSnippetOperations implements SnippetOperations {
   async modifyLintingRule(newRules: Rule[]): Promise<Rule[]> {
     const accessToken = await this.getAccessTokenSilently();
 
-    const response = await fetch(`${LINTTER_SERVICE_URL}`, {
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/linting-rule`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
