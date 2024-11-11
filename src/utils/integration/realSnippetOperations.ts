@@ -198,9 +198,7 @@ export class RealSnippetOperations implements SnippetOperations {
       },
       body: JSON.stringify({ content: snippetContent })
     });
-    const result = await response.text();
-
-    return result;
+    return await response.text();
   }
 
   // TODO
