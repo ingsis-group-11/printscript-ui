@@ -13,7 +13,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Serve the built files
-FROM --platform=linux/amd64 node:18-alpine
+FROM --platform=linux/amd64 node:20-alpine
 WORKDIR /app
 COPY --from=builder /app/dist ./dist
 EXPOSE 4173
