@@ -42,24 +42,12 @@ const paginatedUsers: PaginatedUsers = {
   page_size: 10,
   users: [
     {
-      name: "Chona",
-      id: "1"
+      name: "Martin Barreiro",
+      id: "670afdcd2ecfb6f5bdcb8c7e"
     },
     {
-      name: "Fede",
-      id: "2"
-    },
-    {
-      name: "Mateo",
-      id: "3"
-    },
-    {
-      name: "Tomi",
-      id: "4"
-    },
-    {
-      name: "Berrets",
-      id: "5"
+      name: "Tomas Serra",
+      id: "104393334546561932994"
     }
   ]
 }

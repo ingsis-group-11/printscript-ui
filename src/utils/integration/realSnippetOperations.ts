@@ -105,8 +105,8 @@ export class RealSnippetOperations implements SnippetOperations {
     });
 
     if (!response.ok) {
-      alert(`Error updating snippet: ${response.statusText}`);
-      throw new Error(`Error updating snippet: ${response.statusText}`);
+      alert(`Error updating snippet: ${await response.text()}`);
+      throw new Error(`Error updating snippet: ${await response.text()}`);
     }
 
     return await response.json();
@@ -114,8 +114,9 @@ export class RealSnippetOperations implements SnippetOperations {
 
   // TODO
   async getUserFriends(name: string = "", page: number = 1, pageSize: number = 10): Promise<PaginatedUsers> {
-    const response = await fetch(`${API_BASE_URL}/users/friends?name=${name}&page=${page}&pageSize=${pageSize}`);
-    return await response.json();
+    return new Promise(resolve => {
+      setTimeout(() => resolve(this.fakeStore.getUserFriends(name,page,pageSize)), 500)
+    })
   }
 
   async shareSnippet(snippetId: string, userId: string): Promise<Snippet> {
@@ -157,8 +158,8 @@ export class RealSnippetOperations implements SnippetOperations {
     return rulesDto.map(ruleDto => ({
       id: "",
       name: ruleDto.name,
-      isActive: typeof ruleDto.value === "boolean" ? ruleDto.value : false,
-      value: typeof ruleDto.value !== "boolean" ? ruleDto.value : null
+      isActive: ruleDto.isActive,
+      value: ruleDto.value
     }));
   }
 
@@ -179,10 +180,10 @@ export class RealSnippetOperations implements SnippetOperations {
 
     const rulesDto: Rule[] = await response.json();
     return rulesDto.map(ruleDto => ({
-      id: ruleDto.id,
+      id: "",
       name: ruleDto.name,
-      isActive: typeof ruleDto.value === 'boolean' ? ruleDto.value : true,
-      value: typeof ruleDto.value !== 'boolean' ? ruleDto.value : null
+      isActive: ruleDto.isActive,
+      value: ruleDto.value
     }));
   }
 
@@ -204,6 +205,7 @@ export class RealSnippetOperations implements SnippetOperations {
 
   // TODO
   async postTestCase(testCase: TestCase): Promise<TestCase> {
+    console.log(testCase.id);
     const response = await fetch(`${API_BASE_URL}/testCases`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -234,22 +236,34 @@ export class RealSnippetOperations implements SnippetOperations {
       }
     });
 
+    if (!response.ok) {
+      alert(`Error deleting snippet: ${await response.text()}`);
+    }
+
     return await response.text();
   }
 
   // TODO
   async getFileTypes(): Promise<FileType[]> {
-    return new Promise(resolve => {
-      resolve(this.fakeStore.getFileTypes())
-    })
+    const accessToken = await this.getAccessTokenSilently();
+
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/languages`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch linting rules");
+    }
+
+    return await response.json() as FileType[];
   }
 
   async modifyFormatRule(newRules: Rule[]): Promise<Rule[]> {
     const accessToken = await this.getAccessTokenSilently();
-    const ruleDtos = newRules.map(rule => ({
-      name: rule.name,
-      value: rule.value !== null && rule.value !== undefined ? rule.value : rule.isActive
-    }));
 
     const response = await fetch(`${FORMATTER_SERVICE_URL}`, {
       method: 'PUT',
@@ -257,7 +271,7 @@ export class RealSnippetOperations implements SnippetOperations {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`
       },
-      body: JSON.stringify(ruleDtos)
+      body: JSON.stringify(newRules)
     });
 
     if (!response.ok) {
@@ -270,10 +284,6 @@ export class RealSnippetOperations implements SnippetOperations {
 
   async modifyLintingRule(newRules: Rule[]): Promise<Rule[]> {
     const accessToken = await this.getAccessTokenSilently();
-    const ruleDtos = newRules.map(rule => ({
-      name: rule.name,
-      value: rule.value !== null && rule.value !== undefined ? rule.value : rule.isActive
-    }));
 
     const response = await fetch(`${LINTTER_SERVICE_URL}`, {
       method: 'PUT',
@@ -281,7 +291,7 @@ export class RealSnippetOperations implements SnippetOperations {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`
       },
-      body: JSON.stringify(ruleDtos)
+      body: JSON.stringify(newRules)
     });
 
     if (!response.ok) {
