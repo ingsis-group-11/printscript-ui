@@ -22,25 +22,21 @@ jobs:
           node-version: '20'  # O la versión de Node.js que estés usando
           cache: 'npm'
 
-      # Paso 3: Instalar dependencias de React con npm
-      - name: Install dependencies
+      # Paso 3: Establecer las variables de entorno VITE_AUTH0_DOMAIN y VITE_AUTH0_CLIENT_ID
+      - name: Set environment variables
         run: |
-          npm install
+          echo "VITE_AUTH0_DOMAIN=${{ secrets.AUTH_SERVER_URI }}" >> $GITHUB_ENV
+          echo "VITE_AUTH0_CLIENT_ID=${{ secrets.AUTH_CLIENT_ID }}" >> $GITHUB_ENV
 
-      # Paso 4: Construir la aplicación de React con Vite
-      - name: Build React App
-        run: |
-          npm run build
-
-      # Paso 5: Iniciar sesión en GitHub Container Registry
-      - name: Login GHCR
+      # Paso 4: Iniciar sesión en Docker Hub o GitHub Container Registry
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      # Paso 6: Establecer el tag de la imagen según la rama
+      # Paso 5: Establecer el tag de la imagen según la rama
       - name: Set Docker Image Tag
         id: get-tag
         run: |
@@ -52,12 +48,16 @@ jobs:
             echo "TAG=other" >> $GITHUB_ENV
           fi
 
-      - name: Build And Push Docker Image
+      # Paso 6: Construir y publicar la imagen Docker
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
-          context: . 
+          context: .
           push: true
           tags: ghcr.io/${{ github.repository }}:${{ env.TAG }}
+          build-args: |
+            VITE_AUTH0_DOMAIN=${{ secrets.AUTH_SERVER_URI }}
+            VITE_AUTH0_CLIENT_ID=${{ secrets.AUTH_CLIENT_ID }}
           secrets: |
-            gpr_user=${{github.actor}}
-            gpr_token=${{secrets.DOCKER_TOKEN}}
+            gpr_user=${{ github.actor }}
+            gpr_token=${{ secrets.DOCKER_TOKEN }}
