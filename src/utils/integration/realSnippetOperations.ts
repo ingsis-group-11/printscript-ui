@@ -8,10 +8,10 @@ import {FileType} from "../../types/FileType";
 import {Rule} from "../../types/Rule";
 import {FakeSnippetStore} from '../mock/fakeSnippetStore'
 
-const SNIPPET_MANAGER_URL = import.meta.env.VITE_SNIPPET_MANAGER_URL || 'http://localhost:8000/api';
-const PS_SERVICE_URL = import.meta.env.VITE_PRINTSCRIPT_SERVICE_URL || 'http://localhost:8004/api';
-const API_BASE_URL = 'http://localhost:8080';
-const PERMISSION_SERVICE_URL = import.meta.env.VITE_PERMISSION_MANAGER_URL || 'http://localhost:8003/api/permission';
+const SNIPPET_MANAGER_URL = `${window.location.protocol}//${window.location.hostname}/snippet-manager/api` ;
+const PS_SERVICE_URL = `${window.location.protocol}//${window.location.hostname}/printscript-service/api`; 
+const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}`;
+const PERMISSION_SERVICE_URL = `${window.location.protocol}//${window.location.hostname}/permission-manager/api/permission`;
 
 export class RealSnippetOperations implements SnippetOperations {
   private readonly fakeStore = new FakeSnippetStore()
@@ -95,7 +95,7 @@ export class RealSnippetOperations implements SnippetOperations {
     const fileBlob = new Blob([updateSnippet.content], { type: 'text/plain' });
     formData.append("content", fileBlob);
 
-    const response = await fetch(`${SNIPPET_MANAGER_URL}/${id}`, {
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/snippet/${id}`, {
       method: 'PUT',
       body: formData,
       headers: {
