@@ -9,6 +9,7 @@ import {Rule} from "../../types/Rule";
 import {FakeSnippetStore} from '../mock/fakeSnippetStore'
 
 const SNIPPET_MANAGER_URL = 'http://localhost:8000/api/snippet';
+const PS_SERVICE_URL = 'http://localhost:8004';
 const FORMATTER_SERVICE_URL = 'http://localhost:8000/api/formatter-rule';
 const LINTTER_SERVICE_URL = 'http://localhost:8000/api/linting-rule';
 const API_BASE_URL = 'http://localhost:8080';
@@ -187,14 +188,19 @@ export class RealSnippetOperations implements SnippetOperations {
     }));
   }
 
-  // TODO
   async formatSnippet(snippetContent: string): Promise<string> {
-    const response = await fetch(`${API_BASE_URL}/snippets/format`, {
+    const accessToken = await this.getAccessTokenSilently();
+    const response = await fetch(`${PS_SERVICE_URL}/api/format`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`
+      },
       body: JSON.stringify({ content: snippetContent })
     });
-    return await response.json();
+    const result = await response.json();
+    console.log(result.data);
+    return result.data;
   }
 
   // TODO
