@@ -2,11 +2,17 @@
 
 export function loginViaAuth0Ui(username: string, password: string) {
   // App landing page redirects to Auth0.
-  cy.visit('/')
+  cy.visit('http://localhost:5173/')
 
-  // Login on Auth0.
+  cy.intercept('POST', "https://" + Cypress.env("VITE_AUTH0_DOMAIN") + "/oauth/token", (req) => {
+    const auth0ClientHeader = req.headers['auth0-client'];
+    cy.window().then((win) => {
+      win.localStorage.setItem('authAccessToken', String(auth0ClientHeader))
+  });
+  }).as('login');
+
   cy.origin(
-      Cypress.env('AUTH0_DOMAIN'),
+      Cypress.env('VITE_AUTH0_DOMAIN'),
       { args: { username, password } },
       ({ username, password }) => {
         cy.get('input#username').type(username)
@@ -15,8 +21,9 @@ export function loginViaAuth0Ui(username: string, password: string) {
       }
   )
 
+
   // Ensure Auth0 has redirected us back to the RWA.
-  cy.url().should('equal', 'http://localhost:3000/')
+  cy.url().should('equal', 'http://localhost:5173/')
 }
 
 

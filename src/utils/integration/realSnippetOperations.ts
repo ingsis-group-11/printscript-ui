@@ -8,10 +8,17 @@ import {FileType} from "../../types/FileType";
 import {Rule} from "../../types/Rule";
 import {FakeSnippetStore} from '../mock/fakeSnippetStore'
 
+const SNIPPET_MANAGER_URL = "http://localhost:8000/api";
+const PS_SERVICE_URL = "http://localhost:8004/api";
+const API_BASE_URL = "http://localhost:8000/api";
+const PERMISSION_SERVICE_URL = "http://localhost:8003/api/permission";
+
+/*
 const SNIPPET_MANAGER_URL = `${window.location.protocol}//${window.location.hostname}/snippet-manager/api` ;
 const PS_SERVICE_URL = `${window.location.protocol}//${window.location.hostname}/printscript-service/api`; 
 const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}`;
 const PERMISSION_SERVICE_URL = `${window.location.protocol}//${window.location.hostname}/permission-manager/api/permission`;
+*/
 
 export class RealSnippetOperations implements SnippetOperations {
   private readonly fakeStore = new FakeSnippetStore()
@@ -28,7 +35,6 @@ export class RealSnippetOperations implements SnippetOperations {
     const formData = new FormData();
     const fileBlob = new Blob([createSnippet.content], { type: 'text/plain' });
     formData.append("content", fileBlob, `${createSnippet.name}.${createSnippet.extension}`);
-    formData.append("version", "1.1");
     formData.append("name", createSnippet.name);
     formData.append("language", createSnippet.language);
     formData.append("extension", createSnippet.extension)
@@ -64,6 +70,7 @@ export class RealSnippetOperations implements SnippetOperations {
 
   async listSnippetDescriptors(page: number, pageSize: number): Promise<PaginatedSnippets> {
     const accessToken = await this.getAccessTokenSilently();
+    localStorage.setItem("authAccessToken", accessToken);
     const from = (page + 1) * pageSize - pageSize;
     const to = (page + 1) * pageSize;
 
