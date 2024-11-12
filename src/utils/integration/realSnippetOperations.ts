@@ -80,8 +80,8 @@ export class RealSnippetOperations implements SnippetOperations {
     const result: PaginatedSnippets = {
       page: page,
       page_size: pageSize,
-      count: data.length,
-      snippets: data
+      count: data.maxSnippets,
+      snippets: data.snippets
     };
 
     return result;
