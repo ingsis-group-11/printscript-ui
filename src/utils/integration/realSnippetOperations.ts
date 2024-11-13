@@ -7,21 +7,22 @@ import {TestCaseResult} from "../queries";
 import {FileType} from "../../types/FileType";
 import {Rule} from "../../types/Rule";
 import {FakeSnippetStore} from '../mock/fakeSnippetStore'
+import { User } from '@auth0/auth0-react';
 
+/*
 const SNIPPET_MANAGER_URL = "http://localhost:8000/api";
 const PS_SERVICE_URL = "http://localhost:8004/api";
 const API_BASE_URL = "http://localhost:8000/api";
 const PERMISSION_SERVICE_URL = "http://localhost:8003/api/permission";
+*/
 
-/*
 const SNIPPET_MANAGER_URL = `${window.location.protocol}//${window.location.hostname}/snippet-manager/api` ;
 const PS_SERVICE_URL = `${window.location.protocol}//${window.location.hostname}/printscript-service/api`; 
 const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}`;
 const PERMISSION_SERVICE_URL = `${window.location.protocol}//${window.location.hostname}/permission-manager/api/permission`;
-*/
+
 
 export class RealSnippetOperations implements SnippetOperations {
-  private readonly fakeStore = new FakeSnippetStore()
   private getAccessTokenSilently: () => Promise<string>;
 
   constructor(getAccessTokenSilently: () => Promise<string>) {
@@ -48,8 +49,8 @@ export class RealSnippetOperations implements SnippetOperations {
     });
 
     if (!response.ok) {
-      alert(`Error creating snippet: ${response.statusText}`);
-      throw new Error(`Error creating snippet: ${response.statusText}`);
+      alert(`Error creating snippet: ${await response.text()}`);
+      throw new Error(`Error creating snippet: ${await response.text()}`);
     }
 
     return await response.json();
@@ -118,11 +119,28 @@ export class RealSnippetOperations implements SnippetOperations {
     return await response.json();
   }
 
-  // TODO
   async getUserFriends(name: string = "", page: number = 1, pageSize: number = 10): Promise<PaginatedUsers> {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(this.fakeStore.getUserFriends(name,page,pageSize)), 500)
+    const accessToken = await this.getAccessTokenSilently();
+
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/users`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`
+      }
     })
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch users");
+    }
+    const users: User[] = await response.json();
+    
+    return {
+      page: page,
+      page_size: pageSize,
+      count: users.length,
+      users: users
+    } as PaginatedUsers;
   }
 
   async shareSnippet(snippetId: string, userId: string): Promise<Snippet> {
@@ -141,6 +159,11 @@ export class RealSnippetOperations implements SnippetOperations {
         Authorization: `Bearer ${accessToken}`
       }
     });
+
+    if (!response.ok) {
+      alert(`Error sharing snippet: ${await response.text()}`);
+      throw new Error(`Error sharing snippet: ${await response.text()}`);
+    }
 
     return await response.json();
   }
@@ -252,7 +275,6 @@ export class RealSnippetOperations implements SnippetOperations {
     return await response.text();
   }
 
-  // TODO
   async getFileTypes(): Promise<FileType[]> {
     const accessToken = await this.getAccessTokenSilently();
 
