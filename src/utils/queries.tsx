@@ -74,13 +74,17 @@ export const useGetTestCases = (snippetId: string) => {
 };
 
 
-export const usePostTestCase = (snippetId: string) => {
-  const snippetOperations = useSnippetsOperations()
+export const usePostTestCase = () => {
+  const snippetOperations = useSnippetsOperations();
 
-  return useMutation<TestCase, Error, Partial<TestCase>>(
-      (tc) => snippetOperations.postTestCase(tc, snippetId)
+  return useMutation<TestCase, Error, { tc: Partial<TestCase>, snippetId: string }>(
+      async ({ tc, snippetId }) => {
+        const completeTestCase: TestCase = { testId: tc.testId ?? "default-id", ...tc } as TestCase;
+        return (await snippetOperations).postTestCase(completeTestCase, snippetId);
+      }
   );
 };
+
 
 
 export const useRemoveTestCase = ({onSuccess}: {onSuccess: () => void}) => {
@@ -98,12 +102,16 @@ export const useRemoveTestCase = ({onSuccess}: {onSuccess: () => void}) => {
 export type TestCaseResult = "success" | "fail"
 
 export const useTestSnippet = () => {
-  const snippetOperations = useSnippetsOperations()
+  const snippetOperations = useSnippetsOperations();
 
-  return useMutation<TestCaseResult, Error, Partial<TestCase>>(
-      (tc) => snippetOperations.testSnippet(tc)
-  )
-}
+  return useMutation<TestCaseResult, Error, { tc: Partial<TestCase>, snippetId: string }>(
+      async ({ tc, snippetId }) => {
+        const completeTestCase = { ...tc, testId: tc.testId ?? "default-id" };
+        return snippetOperations.testSnippet(completeTestCase, snippetId);
+      }
+  );
+};
+
 
 
 

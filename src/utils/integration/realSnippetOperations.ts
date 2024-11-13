@@ -7,18 +7,20 @@ import {TestCaseResult} from "../queries";
 import {FileType} from "../../types/FileType";
 import {Rule} from "../../types/Rule";
 import { User } from '@auth0/auth0-react';
+import {toast} from "react-toastify";
 
-/*
+
 const SNIPPET_MANAGER_URL = "http://localhost:8000/api";
 const PS_SERVICE_URL = "http://localhost:8004/api";
 const API_BASE_URL = "http://localhost:8000/api";
 const PERMISSION_SERVICE_URL = "http://localhost:8003/api/permission";
-*/
 
+/*
 const SNIPPET_MANAGER_URL = `${window.location.protocol}//${window.location.hostname}/snippet-manager/api` ;
 const PS_SERVICE_URL = `${window.location.protocol}//${window.location.hostname}/printscript-service/api`; 
 const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}`;
 const PERMISSION_SERVICE_URL = `${window.location.protocol}//${window.location.hostname}/permission-manager/api/permission`;
+ */
 
 
 export class RealSnippetOperations implements SnippetOperations {
@@ -48,8 +50,11 @@ export class RealSnippetOperations implements SnippetOperations {
     });
 
     if (!response.ok) {
-      alert(`Error creating snippet: ${await response.text()}`);
+      toast.error(`Error creating snippet: ${await response.text()}`);
       throw new Error(`Error creating snippet: ${await response.text()}`);
+    }
+    else {
+        toast.success("Snippet created successfully");
     }
 
     return await response.json();
@@ -111,8 +116,11 @@ export class RealSnippetOperations implements SnippetOperations {
     });
 
     if (!response.ok) {
-      alert(`Error updating snippet: ${await response.text()}`);
+      toast.error(`Error updating snippet: ${await response.text()}`);
       throw new Error(`Error updating snippet: ${await response.text()}`);
+    }
+    else {
+        toast.success("Snippet updated successfully");
     }
 
     return await response.json();
@@ -160,8 +168,11 @@ export class RealSnippetOperations implements SnippetOperations {
     });
 
     if (!response.ok) {
-      alert(`Error sharing snippet: ${await response.text()}`);
+      toast.error(`Error sharing snippet: ${await response.text()}`);
       throw new Error(`Error sharing snippet: ${await response.text()}`);
+    }
+    else {
+        toast.success("Snippet shared successfully");
     }
 
     return await response.json();
@@ -225,36 +236,81 @@ export class RealSnippetOperations implements SnippetOperations {
       },
       body: JSON.stringify({ content: snippetContent })
     });
+    if (!response.ok) {
+      toast.error(`Error formatting snippet: ${await response.text()}`);
+    }
+    else {
+        toast.success("Snippet formatted successfully");
+    }
+
     return await response.text();
   }
 
-  // TODO
-  async getTestCases(): Promise<TestCase[]> {
-    const response = await fetch(`${API_BASE_URL}/testCases`);
+
+  async getTestCases(snippetId: string): Promise<TestCase[]> {
+    const accessToken = await this.getAccessTokenSilently();
+
+    console.log(snippetId)
+    const response = await fetch(`${API_BASE_URL}/snippet/testCases/${snippetId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`
+          },
+        });
+
+
     return await response.json();
   }
 
-  // TODO
-  async postTestCase(testCase: TestCase): Promise<TestCase> {
-    console.log(testCase.id);
-    const response = await fetch(`${API_BASE_URL}/testCases`, {
+
+  async postTestCase(testCase: TestCase, snippetId: string): Promise<TestCase> {
+    const accessToken = await this.getAccessTokenSilently();
+    console.log(testCase);
+    console.log(snippetId)
+    const response = await fetch(`${API_BASE_URL}/snippet/testCases/${snippetId}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`
+      },
       body: JSON.stringify(testCase)
     });
+    if (!response.ok) {
+      toast.error(`Error fetching test cases: ${await response.text()}`);
+    }
     return await response.json();
   }
 
-  // TODO
+
   async removeTestCase(id: string): Promise<string> {
-    await fetch(`${API_BASE_URL}/testCases/${id}`, { method: 'DELETE' });
+    const accessToken = await this.getAccessTokenSilently();
+    const response = await fetch(`${API_BASE_URL}/snippet/testCases/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`
+      }});
+    if (!response.ok) {
+      toast.error(`Error removing test case: ${await response.text()}`);
+    }
+    else {
+        toast.success("Test case removed successfully");
+    }
     return id;
   }
 
-  // TODO
-  async testSnippet(): Promise<TestCaseResult> {
-    const response = await fetch(`${API_BASE_URL}/snippets/test`, { method: 'DELETE' });
-    return await response.json();
+  async testSnippet(testCase: TestCase, snippetId : string): Promise<TestCaseResult> {
+    const accessToken = await this.getAccessTokenSilently();
+    console.log(testCase);
+    console.log(snippetId)
+    const response = await fetch(`${API_BASE_URL}/snippet/testCases/test/${snippetId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`
+      },
+      body: JSON.stringify(testCase)
+    });
+    return await response.text() as TestCaseResult;
   }
 
   async deleteSnippet(id: string): Promise<string> {
@@ -268,7 +324,10 @@ export class RealSnippetOperations implements SnippetOperations {
     });
 
     if (!response.ok) {
-      alert(`Error deleting snippet: ${await response.text()}`);
+      toast.error(`Error deleting snippet: ${await response.text()}`);
+    }
+    else {
+        toast.success("Snippet deleted successfully");
     }
 
     return await response.text();
@@ -305,7 +364,12 @@ export class RealSnippetOperations implements SnippetOperations {
     });
 
     if (!response.ok) {
+      toast.error(`Error updating formatting rules: ${await response.text()}`);
+
       throw new Error("Failed to update format rules");
+    }
+    else {
+      toast.success("Linting rules updated successfully");
     }
 
     const updatedRules: Rule[] = await response.json();
@@ -325,7 +389,11 @@ export class RealSnippetOperations implements SnippetOperations {
     });
 
     if (!response.ok) {
+      toast.error(`Error updating linting rules: ${await response.text()}`);
       throw new Error("Failed to update linting rules");
+    }
+    else {
+        toast.success("Linting rules updated successfully");
     }
 
     const updatedRules: Rule[] = await response.json();
