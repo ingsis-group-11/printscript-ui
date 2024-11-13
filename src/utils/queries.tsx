@@ -2,26 +2,19 @@ import {useMutation, UseMutationResult, useQuery} from 'react-query';
 import {CreateSnippet, PaginatedSnippets, Snippet, UpdateSnippet} from './snippet.ts';
 import {SnippetOperations} from "./snippetOperations.ts";
 import {PaginatedUsers} from "./users.ts";
-import {FakeSnippetOperations} from "./mock/fakeSnippetOperations.ts";
 import {TestCase} from "../types/TestCase.ts";
 import {FileType} from "../types/FileType.ts";
 import {Rule} from "../types/Rule.ts";
-// import {useAuth0} from "@auth0/auth0-react";
-// import {useEffect} from "react";
+import {useAuth0} from "@auth0/auth0-react";
+import { RealSnippetOperations } from './integration/realSnippetOperations.ts';
 
 
 export const useSnippetsOperations = () => {
-  // const {getAccessTokenSilently} = useAuth0()
-  //
-  // useEffect(() => {
-  //     getAccessTokenSilently()
-  //         .then(token => {
-  //             console.log(token)
-  //         })
-  //         .catch(error => console.error(error));
-  // });
+  const {getAccessTokenSilently} = useAuth0()
+  
 
-  const snippetOperations: SnippetOperations = new FakeSnippetOperations(/* getAccessTokenSilently */); // TODO: Replace with your implementation
+  const snippetOperations: SnippetOperations = new RealSnippetOperations(getAccessTokenSilently);
+  //const snippetOperations: SnippetOperations = new FakeSnippetOperations(/* getAccessTokenSilently */);
 
   return snippetOperations
 }
@@ -36,7 +29,7 @@ export const useGetSnippetById = (id: string) => {
   const snippetOperations = useSnippetsOperations()
 
   return useQuery<Snippet | undefined, Error>(['snippet', id], () => snippetOperations.getSnippetById(id), {
-    enabled: !!id, // This query will not execute until the id is provided
+    enabled: !!id,
   });
 };
 
