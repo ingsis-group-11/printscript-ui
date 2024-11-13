@@ -3,7 +3,7 @@ name: Build and Push Docker Image for React Frontend
 on:
   push:
     branches:
-      - main
+      - master
       - dev
 
 jobs:
@@ -40,7 +40,7 @@ jobs:
       - name: Set Docker Image Tag
         id: get-tag
         run: |
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
             echo "TAG=latest" >> $GITHUB_ENV
           elif [ "${{ github.ref }}" == "refs/heads/dev" ]; then
             echo "TAG=dev" >> $GITHUB_ENV
