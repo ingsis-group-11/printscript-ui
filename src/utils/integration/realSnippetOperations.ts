@@ -6,7 +6,6 @@ import {TestCase} from "../../types/TestCase";
 import {TestCaseResult} from "../queries";
 import {FileType} from "../../types/FileType";
 import {Rule} from "../../types/Rule";
-import {FakeSnippetStore} from '../mock/fakeSnippetStore'
 import { User } from '@auth0/auth0-react';
 
 /*
@@ -121,7 +120,7 @@ export class RealSnippetOperations implements SnippetOperations {
 
   async getUserFriends(name: string = "", page: number = 1, pageSize: number = 10): Promise<PaginatedUsers> {
     const accessToken = await this.getAccessTokenSilently();
-
+    console.log(name);
     const response = await fetch(`${SNIPPET_MANAGER_URL}/users`, {
       method: 'GET',
       headers: {
