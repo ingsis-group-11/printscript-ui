@@ -3,7 +3,7 @@ import { TestCase } from "../../types/TestCase.ts";
 import { Autocomplete, Box, Button, Chip, TextField, Typography } from "@mui/material";
 import { BugReport, Delete, Save } from "@mui/icons-material";
 import { useTestSnippet } from "../../utils/queries.tsx";
-import { toast } from "react-toastify";
+import {toast} from "react-toastify";
 
 type TabPanelProps = {
     index: number;
@@ -11,24 +11,27 @@ type TabPanelProps = {
     test?: TestCase;
     setTestCase: (test: Partial<TestCase>) => void;
     removeTestCase?: (testIndex: string) => void;
+    snippetId: string;
 };
 
-export const TabPanel = ({ value, index, test: initialTest, setTestCase, removeTestCase }: TabPanelProps) => {
+export const TabPanel = ({ snippetId, value, index, test: initialTest, setTestCase, removeTestCase }: TabPanelProps) => {
     const [testData, setTestData] = useState<Partial<TestCase> | undefined>(initialTest);
     const { mutateAsync: testSnippet } = useTestSnippet();
-
-    useEffect(() => {
-        setTestData(initialTest ?? { input: [], output: [] });
-    }, [initialTest, index]);
-
     const handleTest = async () => {
-        const result = await testSnippet(testData ?? {});
-        if (result === "success") {
+        const result = await testSnippet({tc: testData ?? {}, snippetId});
+        console.log(result);
+        if (String(result) === "success") {
+
             toast.success("Test passed 🎉");
         } else {
             toast.error("Test failed 😢");
         }
     };
+
+    useEffect(() => {
+        console.log(testData?.testId);
+    }, [testData, testSnippet]);
+
 
     return (
         <div
@@ -56,7 +59,12 @@ export const TabPanel = ({ value, index, test: initialTest, setTestCase, removeT
                             id="tags-filled"
                             freeSolo
                             value={testData?.input ?? []}
-                            onChange={(_, value) => setTestData({ ...testData, input: value })}
+                            onChange={(_, value) =>
+                                setTestData((prevState) => ({
+                                    ...prevState,
+                                    input: value
+                                }))
+                            }
                             renderTags={(value: readonly string[], getTagProps) =>
                                 value.map((option: string, index: number) => (
                                     <Chip variant="outlined" label={option} {...getTagProps({ index })} />
@@ -74,7 +82,12 @@ export const TabPanel = ({ value, index, test: initialTest, setTestCase, removeT
                             id="tags-filled"
                             freeSolo
                             value={testData?.output ?? []}
-                            onChange={(_, value) => setTestData({ ...testData, output: value })}
+                            onChange={(_, value) =>
+                                setTestData((prevState) => ({
+                                    ...prevState,
+                                    output: value
+                                }))
+                            }
                             renderTags={(value: readonly string[], getTagProps) =>
                                 value.map((option: string, index: number) => (
                                     <Chip variant="outlined" label={option} {...getTagProps({ index })} />
@@ -85,15 +98,15 @@ export const TabPanel = ({ value, index, test: initialTest, setTestCase, removeT
                         />
                     </Box>
                     <Box display="flex" flexDirection="row" gap={1}>
-                        {testData?.id && removeTestCase && (
-                            <Button onClick={() => removeTestCase(testData.id ?? "")} variant="outlined" color="error" startIcon={<Delete />}>
+                        {testData?.testId && removeTestCase && (
+                            <Button onClick={() => removeTestCase(testData.testId ?? "")} variant="outlined" color="error" startIcon={<Delete />}>
                                 Remove
                             </Button>
                         )}
                         <Button disabled={!testData?.name} onClick={() => setTestCase(testData ?? {})} variant="outlined" startIcon={<Save />}>
                             Save
                         </Button>
-                        {testData?.id && (
+                        {testData?.testId && (
                             <Button onClick={handleTest} variant="contained" startIcon={<BugReport />} disableElevation>
                                 Test
                             </Button>
