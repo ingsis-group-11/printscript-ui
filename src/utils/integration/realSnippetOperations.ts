@@ -9,18 +9,19 @@ import {Rule} from "../../types/Rule";
 import { User } from '@auth0/auth0-react';
 import {toast} from "react-toastify";
 
-
+/*
 const SNIPPET_MANAGER_URL = "http://localhost:8000/api";
 const PS_SERVICE_URL = "http://localhost:8004/api";
 const API_BASE_URL = "http://localhost:8000/api";
 const PERMISSION_SERVICE_URL = "http://localhost:8003/api/permission";
+ */
 
-/*
+
 const SNIPPET_MANAGER_URL = `${window.location.protocol}//${window.location.hostname}/snippet-manager/api` ;
 const PS_SERVICE_URL = `${window.location.protocol}//${window.location.hostname}/printscript-service/api`; 
 const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}`;
 const PERMISSION_SERVICE_URL = `${window.location.protocol}//${window.location.hostname}/permission-manager/api/permission`;
- */
+
 
 
 export class RealSnippetOperations implements SnippetOperations {
