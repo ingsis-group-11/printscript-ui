@@ -19,7 +19,6 @@ const PERMISSION_SERVICE_URL = "http://localhost:8003/api/permission";
 
 const SNIPPET_MANAGER_URL = `${window.location.protocol}//${window.location.hostname}/snippet-manager/api` ;
 const PS_SERVICE_URL = `${window.location.protocol}//${window.location.hostname}/printscript-service/api`; 
-const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}`;
 const PERMISSION_SERVICE_URL = `${window.location.protocol}//${window.location.hostname}/permission-manager/api/permission`;
 
 
