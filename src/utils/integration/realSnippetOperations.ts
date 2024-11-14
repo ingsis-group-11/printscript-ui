@@ -279,6 +279,9 @@ export class RealSnippetOperations implements SnippetOperations {
     if (!response.ok) {
       toast.error(`Error fetching test cases: ${await response.text()}`);
     }
+    else {
+      toast.success("Test case added successfully");
+    }
     return await response.json();
   }
 
