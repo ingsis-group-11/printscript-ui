@@ -252,7 +252,7 @@ export class RealSnippetOperations implements SnippetOperations {
     const accessToken = await this.getAccessTokenSilently();
 
     console.log(snippetId)
-    const response = await fetch(`${API_BASE_URL}/snippet/testCases/${snippetId}`,
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/snippet/testCases/${snippetId}`,
         {
           method: 'GET',
           headers: {
@@ -270,7 +270,7 @@ export class RealSnippetOperations implements SnippetOperations {
     const accessToken = await this.getAccessTokenSilently();
     console.log(testCase);
     console.log(snippetId)
-    const response = await fetch(`${API_BASE_URL}/snippet/testCases/${snippetId}`, {
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/snippet/testCases/${snippetId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`
@@ -286,7 +286,7 @@ export class RealSnippetOperations implements SnippetOperations {
 
   async removeTestCase(id: string): Promise<string> {
     const accessToken = await this.getAccessTokenSilently();
-    const response = await fetch(`${API_BASE_URL}/snippet/testCases/${id}`, {
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/snippet/testCases/${id}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`
@@ -304,7 +304,7 @@ export class RealSnippetOperations implements SnippetOperations {
     const accessToken = await this.getAccessTokenSilently();
     console.log(testCase);
     console.log(snippetId)
-    const response = await fetch(`${API_BASE_URL}/snippet/testCases/test/${snippetId}`, {
+    const response = await fetch(`${SNIPPET_MANAGER_URL}/snippet/testCases/test/${snippetId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`
