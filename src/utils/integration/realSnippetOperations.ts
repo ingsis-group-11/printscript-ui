@@ -370,7 +370,7 @@ export class RealSnippetOperations implements SnippetOperations {
       throw new Error("Failed to update format rules");
     }
     else {
-      toast.success("Linting rules updated successfully");
+      toast.success("Format rules updated successfully");
     }
 
     const updatedRules: Rule[] = await response.json();
