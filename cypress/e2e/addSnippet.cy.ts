@@ -9,9 +9,9 @@ describe('Add snippet tests', () => {
     )
   })
   it('Can add snippets manually', () => {
-    cy.visit("http://localhost:5173")
-    cy.wait(5000)
-    cy.intercept('PUT', "http://localhost:8000/api/snippet", (req) => {
+    cy.visit("https://printscript-prod.brazilsouth.cloudapp.azure.com")
+    cy.wait(10000)
+    cy.intercept('PUT', "https://printscript-prod.brazilsouth.cloudapp.azure.com/snippet-manager/api/snippet", (req) => {
       const formData = interceptFormData(req);
   
       expect(formData["name"]).to.eq("Some snippet name");
@@ -39,9 +39,9 @@ describe('Add snippet tests', () => {
   })
 
   it('Can add snippets via file', () => {
-    cy.visit("http://localhost:5173")
-    cy.wait(5000)
-    cy.intercept('PUT', "http://localhost:8000/api/snippet", (req) => {
+    cy.visit("https://printscript-prod.brazilsouth.cloudapp.azure.com")
+    cy.wait(10000)
+    cy.intercept('PUT', "https://printscript-prod.brazilsouth.cloudapp.azure.com/snippet-manager/api/snippet", (req) => {
       const formData = interceptFormData(req);
   
       expect(formData["name"]).to.eq("example_ps");

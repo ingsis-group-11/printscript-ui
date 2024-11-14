@@ -10,7 +10,7 @@ describe('Home', () => {
     )
   })
   it('Renders home', () => {
-    cy.visit("http://localhost:5173")
+    cy.visit("https://printscript-prod.brazilsouth.cloudapp.azure.com")
     /* ==== Generated with Cypress Studio ==== */
     cy.get('.MuiTypography-h6').should('have.text', 'Printscript');
     cy.get('.MuiBox-root > .MuiInputBase-root > .MuiInputBase-input').should('be.visible');
@@ -21,7 +21,7 @@ describe('Home', () => {
 
   // You need to have at least 1 snippet in your DB for this test to pass
   it('Renders the first snippets', () => {
-    cy.visit("http://localhost:5173")
+    cy.visit("https://printscript-prod.brazilsouth.cloudapp.azure.com")
     const first10Snippets = cy.get('[data-testid="snippet-row"]')
 
     first10Snippets.should('have.length.greaterThan', 0)
@@ -30,7 +30,7 @@ describe('Home', () => {
   })
 
   it('Can create snippet and find snippets by name', () => {
-    cy.visit("http://localhost:5173")
+    cy.visit("https://printscript-prod.brazilsouth.cloudapp.azure.com")
     
     const snippetData = {
       name: "Snippet Test",
@@ -39,14 +39,14 @@ describe('Home', () => {
       extension: "prs"
     }
   
-    cy.intercept('GET', `http://localhost:8000/snippet`, (req) => {
+    cy.intercept('GET', `https://printscript-prod.brazilsouth.cloudapp.azure.com/snippet-manager/api/snippet`, (req) => {
       req.reply((res) => {
         expect(res.statusCode).to.eq(200);
       });
     }).as('getSnippets');
   
     // Interceptar la solicitud PUT y verificar el FormData
-    cy.intercept('PUT', 'http://localhost:8000/api/snippet', (req) => {
+    cy.intercept('PUT', 'https://printscript-prod.brazilsouth.cloudapp.azure.com/snippet-manager/api/snippet', (req) => {
       const formData = interceptFormData(req); // Función para interceptar FormData
   
       // Verificar los datos dentro de FormData
@@ -79,7 +79,7 @@ describe('Home', () => {
     // Realizar la solicitud PUT con el token de localStorage y FormData
     cy.request({
       method: 'PUT',
-      url: `http://localhost:8000/api/snippet`,
+      url: `https://printscript-prod.brazilsouth.cloudapp.azure.com/snippet-manager/api/snippet`,
       body: formData,
       headers: {
         Authorization: `Bearer ${authToken}`

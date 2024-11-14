@@ -3,7 +3,7 @@ import {AUTH0_USERNAME,AUTH0_PASSWORD, FRONTEND_URL} from "../../src/utils/const
 
 describe('Protected routes test', () => {
   it('should redirect to login when accessing a protected route unauthenticated', () => {
-    cy.visit("http://localhost:5173" + "/rules");
+    cy.visit("https://printscript-prod.brazilsouth.cloudapp.azure.com" + "/rules");
 
     cy.origin(Cypress.env('VITE_AUTH0_DOMAIN'), () => {
       cy.url().should('include', '/login');
@@ -11,7 +11,7 @@ describe('Protected routes test', () => {
   });
 
   it('should display login content', () => {
-    cy.visit("http://localhost:5173");
+    cy.visit("https://printscript-prod.brazilsouth.cloudapp.azure.com");
     cy.wait(2000)
 
     cy.origin(Cypress.env('VITE_AUTH0_DOMAIN'), () => {
@@ -26,9 +26,9 @@ describe('Protected routes test', () => {
       Cypress.env("AUTH0_PASSWORD")
     )
 
-    cy.visit("http://localhost:5173");
+    cy.visit("https://printscript-prod.brazilsouth.cloudapp.azure.com");
 
-    cy.wait(1000)
+    cy.wait(10000)
 
     // Check if the URL is redirected to the login page
     cy.url().should('not.include', '/login');

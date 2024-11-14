@@ -15,12 +15,12 @@ describe('Add snippet tests', () => {
       Cypress.env("AUTH0_USERNAME"),
       Cypress.env("AUTH0_PASSWORD")
     )
-    cy.intercept('GET', "http://localhost:8000/snippet", {
+    cy.intercept('GET', "https://printscript-prod.brazilsouth.cloudapp.azure.com/snippet-manager/api/snippet", {
       statusCode: 200,
       body: snippet,
     }).as("getSnippetById")
 
-    cy.intercept('GET', "http://localhost:8000/snippet", {
+    cy.intercept('GET', "https://printscript-prod.brazilsouth.cloudapp.azure.com/snippet-manager/api/snippet", {
       statusCode: 200,
       body: {
         page: 1,
@@ -31,7 +31,7 @@ describe('Add snippet tests', () => {
     }).as("getSnippets");
 
     cy.visit("/")
-    cy.wait(5000)
+    cy.wait(10000)
 
     cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').click();
   })
@@ -39,7 +39,7 @@ describe('Add snippet tests', () => {
   it('Can share a snippet ', () => {
     cy.get('[aria-label="Share"]').click();
     cy.get('#\\:rj\\:').click();
-    cy.get('#\\:rj\\:-option-1').click();
+    cy.get('#\\:rj\\:-option-0').click();
     cy.get('.css-1yuhvjn > .MuiBox-root > .MuiButton-contained').click();
     cy.wait(2000)
   })
